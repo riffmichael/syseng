@@ -8,12 +8,15 @@
   var client = mqtt.connect('ws://18.216.163.14:3000') // you add a ws:// url here
   client.subscribe("ledStatus")
  
+
   client.on("message", function (topic, payload) {
-    alert([topic, payload].join(": "))
+//    alert([topic, payload].join(": "))
     client.end()
   })
  
-  client.publish("ledStatus", "hello world!")
+  client.publish("ledStatus", "left")
+  client.publish("ledStatus", "right")
+
 </script> 
 </body>
 </html>

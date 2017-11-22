@@ -6,16 +6,39 @@
 <p>This example uses the HTML DOM to assign an "onmousedown" and "onmouseup" event to a p element.</p>
 
 <p id="demo">Click me.</p>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <script>
 document.getElementById("demo").onmousedown = function() {mouseDown()};
 document.getElementById("demo").onmouseup = function() {mouseUp()};
 
 function mouseDown() {
+
+
+  var client = mqtt.connect('ws://18.216.163.14:3000') // you add a ws:// $
+  client.subscribe("ledStatus")
+
+
+  client.on("message", function (topic, payload) {
+    client.end()
+  })
+
+  client.publish("ledStatus", "down")
     document.getElementById("demo").innerHTML = "The mouse button is held down.";
+
 }
 
 function mouseUp() {
+
+  var client = mqtt.connect('ws://18.216.163.14:3000') // you add a ws:// $
+  client.subscribe("ledStatus")
+
+
+  client.on("message", function (topic, payload) {
+    client.end()
+  })
+
+  client.publish("ledStatus", "up")
     document.getElementById("demo").innerHTML = "You released the mouse button.";
 }
 </script>
