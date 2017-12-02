@@ -1,0 +1,91 @@
+#include <EEPROM.h>
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+#include <Wire.h>
+#include "WEMOS_Motor.h"
+
+int pwm;
+
+//Motor shiled I2C Address: 0x30
+//PWM frequency: 1000Hz(1kHz)
+Motor M1(0x30,_MOTOR_A, 1000);//Motor A
+Motor M2(0x30,_MOTOR_B, 1000);//Motor B
+ 
+// Connect to the WiFi
+const char* ssid = "vpntest";
+const char* password = "1234567";
+const char* mqtt_server = "18.221.221.249";
+ 
+WiFiClient espClienthead;
+PubSubClient client(espClienthead);
+
+const byte ledPin = 2; // Pin with LED on Adafruit Huzzah
+
+String cbv="0";
+ 
+String callback(char* topic, byte* payload, unsigned int length) {
+ Serial.print("Message arrived [");
+ Serial.print(topic);
+ Serial.print("] ");
+Serial.println((char)payload[0]);
+if ((char)payload[0]=='u'){cbv="1";}
+if ((char)payload[0]=='d'){cbv="2";}
+return cbv;
+}
+ 
+ 
+void reconnect() {
+ // Loop until we're reconnected
+ while (!client.connected()) {
+ Serial.print("Attempting MQTT connection...");
+ // Attempt to connect
+ if (client.connect("robothead")) {
+  Serial.println("connected");
+  // ... and subscribe to topic
+  client.subscribe("ledStatus");
+  client.subscribe("ledStatus2");
+  
+ } else {
+  Serial.print("failed, rc=");
+  Serial.print(client.state());
+  Serial.println(" try again in 5 seconds");
+  // Wait 5 seconds before retrying
+  delay(5000);
+  }
+ }
+
+
+}
+ 
+void setup()
+{
+ Serial.begin(9600);
+ 
+ client.setServer(mqtt_server, 1883);
+ client.setCallback(callback);
+ 
+ pinMode(ledPin, OUTPUT);
+}
+ 
+void loop()
+{
+
+ if (!client.connected()) {
+  reconnect();
+ }
+ client.loop();
+ Serial.println(cbv);
+if(cbv=="2"){forward();}
+if(cbv=="1"){stop();}
+}
+
+
+void forward() {
+   M1.setmotor( _CW, 100);
+   Serial.println("should move");
+   
+}
+
+void stop() {
+M1.setmotor(_STOP);
+}
