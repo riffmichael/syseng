@@ -12,25 +12,22 @@ Motor M1(0x30,_MOTOR_A, 1000);//Motor A
 Motor M2(0x30,_MOTOR_B, 1000);//Motor B
  
 // Connect to the WiFi
-const char* ssid = "vpntest";
-const char* password = "1234567";
-const char* mqtt_server = "18.221.221.249";
+const char* ssid = "";
+const char* password = "";
+const char* mqtt_server = "...";
  
 WiFiClient espClienthead;
 PubSubClient client(espClienthead);
 
 const byte ledPin = 2; // Pin with LED on Adafruit Huzzah
 
-String cbv="0";
+char cbv='0';
  
-String callback(char* topic, byte* payload, unsigned int length) {
- Serial.print("Message arrived [");
- Serial.print(topic);
- Serial.print("] ");
-Serial.println((char)payload[0]);
-if ((char)payload[0]=='u'){cbv="1";}
-if ((char)payload[0]=='d'){cbv="2";}
-return cbv;
+void callback(char* topic, byte* payload, unsigned int length) {
+ //Serial.print("Message arrived [");
+ //Serial.print(topic);
+ //Serial.print("] ");
+cbv = (char)payload[0];
 }
  
  
@@ -74,18 +71,34 @@ void loop()
   reconnect();
  }
  client.loop();
- Serial.println(cbv);
-if(cbv=="2"){forward();}
-if(cbv=="1"){stop();}
+if(cbv=='f'){fire();}
+if(cbv=='e'){elivate();}
+if(cbv=='r'){right();}
+if(cbv=='l'){left();}
+if(cbv=='u'){stop();}
+
 }
 
 
-void forward() {
-   M1.setmotor( _CW, 100);
-   Serial.println("should move");
-   
+void left() {
+   M1.setmotor( _CW, 50);
 }
+
+
+void right() {
+   M1.setmotor( _CCW, 50);
+}
+
+void fire() {
+   M2.setmotor( _CW, 50);
+}
+
+void elivate() {
+   M2.setmotor( _CCW, 50);
+}
+
 
 void stop() {
 M1.setmotor(_STOP);
+M2.setmotor(_STOP);
 }
